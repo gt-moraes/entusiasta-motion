@@ -1,0 +1,10 @@
+entusiasta-motion
+Copyright (c) 2026 Guilherme Teodoro (gt-moraes)
+
+Este projeto deriva da motion-designer, de Felipe Tâmbara
+(https://github.com/felipefernandees/motion-designer-skill), versão v1.1,
+commit da7d7cb. Os direitos sobre o conteúdo original continuam com o autor
+original. O repositório de origem não declara licença.
+
+Componentes de terceiros (Remotion, logos, sons, fontes, whisper.cpp) seguem
+as licenças listadas na seção "Créditos e licenças de terceiros" do README.
