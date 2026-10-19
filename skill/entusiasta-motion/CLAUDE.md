@@ -55,6 +55,10 @@ Peça boa que nasceu dentro de um motion e serviria em outro: promover pra `src/
 - Fonte SF Pro e SF Symbols não podem sair de app Apple (e a da Nomad é paga): texto e legenda em **Geist** (`ds/fontes.ts`), números em Inter Tight (aprovados).
 - macOS não diferencia maiúscula: nunca ter `x.ts` e `X.tsx` na mesma pasta (quebrou o `legendas.ts` x `Legendas.tsx`).
 - Bruto do DJI é HEVC 4K: sempre usar o proxy do `preparar.py`, nunca o original na composição.
+- Bruto do iPhone (16/10/2026) vem MOV 3840x2160 com `rotation=90` e HLG/BT.2020 Dolby Vision. Dois cuidados no proxy: **manter a rotação** (proxy feito por VideoToolbox perdeu e o vídeo saiu deitado dentro do quadro 1080x1920, sem o ffprobe acusar) e **tonemap pra BT.709** (sem isso a imagem sai lavada). Desde 19/10/2026 o `preparar.py` resolve os dois: lê `color_transfer` e `rotation` pelo `ffprobe` e, se for HLG ou PQ, faz o tonemap no `scale_vt` (VideoToolbox) com `-noautorotate` e gira em software com `transpose` (o ffmpeg daqui não tem `zscale` nem `libplacebo`). Se o VideoToolbox falhar, cai no caminho antigo e avisa que o proxy sai lavado. Testado em trecho do IMG_8190: 1080x1920 BT.709, rosto com roll 0, YAVG 117 contra 146 do proxy sem tonemap. Mesmo assim, conferir a orientação pelo rosto num quadro do proxy antes de recortar.
+- Orientação se confere pelo rosto, não pelo tamanho do quadro: detecção de face (Apple Vision) em alguns quadros do mp4 final, roll perto de 0 = em pé, perto de 90 = deitado.
+- Recorte da pessoa (green screen, frame break, cover story e afins): tirar do proxy JÁ em pé e tonemapeado, endurecer o alfa e descontaminar a borda. Drop-shadow em borda suja vira borrão preto em volta da pessoa.
+- Render longo com pouca RAM ou disco: `--concurrency=1 --timeout=120000` e cache do OffthreadVideo em 256 MB, em primeiro plano, um render por vez.
 - A fonte de título de marca real é licenciada: nunca baixar da LP de referência, achar equivalente no Google Fonts.
 - Composição nova só aparece depois de registrada em `src/Root.tsx`.
 - Preview ao vivo: `cd studio && npm run studio` (abre o Remotion Studio no navegador).

@@ -2,7 +2,7 @@ import type {Edicao, ModoFala} from './tipos';
 
 // Grupos de legenda no estilo criador: 2 a 3 palavras, quebra em pontuação e na troca de fala,
 // tudo minúsculo (nomes em caixa alta ficam: CTA e siglas).
-export type GrupoLegenda = {de: number; ate: number; texto: string; modo: ModoFala};
+export type GrupoLegenda = {de: number; ate: number; texto: string; modo: ModoFala; top?: number};
 const MANTER = new Set(['EDITOR', 'DM', 'A', 'Z', 'IA']);
 
 export const agruparLegendas = (ed: Edicao, modos: ModoFala[], maxPalavras = 3, manter: string[] = []): GrupoLegenda[] => {

@@ -14,7 +14,7 @@ const Grupo: React.FC<{g: GrupoLegenda; escura: boolean}> = ({g, escura}) => {
   const b = useBranding();
   const t = usaMola(f, fps, M.chegada);
   return (
-    <div style={{position: 'absolute', left: 0, width: 1080, top: ALTURA_LEGENDA[g.modo], display: 'flex', justifyContent: 'center'}}>
+    <div style={{position: 'absolute', left: 0, width: 1080, top: g.top ?? ALTURA_LEGENDA[g.modo], display: 'flex', justifyContent: 'center'}}>
       <span
         style={{
           fontFamily: geist, fontWeight: 600, fontSize: 78, letterSpacing: -2, lineHeight: 1.05, maxWidth: 960, textAlign: 'center',
