@@ -19,6 +19,7 @@
 | Brutos (proxy) e edições | `public/brutos/<id>.mp4`, `public/edicoes/<id>.json` |
 | Sons aprovados | `public/sfx/ui/` (Mixkit + HyperFrames, licença em `LICENCA-mixkit.txt`) |
 | Modelo do modo editado | `src/acervo/_modelos/modelo-editado/` |
+| Variações pra trial reels | `src/edicao/variacoes.ts` (`reordena`, `posicao`, `todas`) + `referencias/trials.md` |
 | Perfil do criador (pessoal) | `perfil.md` (questionário em `referencias/onboarding.md`) |
 | Memória do criador (pessoal) | `MEMORY.md` (modelo em `MEMORY.exemplo.md`) |
 | Retomada | `HANDOFF.md` (pessoal) |

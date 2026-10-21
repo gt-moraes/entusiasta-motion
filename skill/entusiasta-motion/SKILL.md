@@ -12,7 +12,8 @@ description: Edita reels inteiros e cria motion design em código (Remotion) no 
 3. `MEMORY.md`: o que ESTE criador aprovou e reprovou (pessoal). Crie a partir de `MEMORY.exemplo.md` se não existir.
 4. `referencias/doutrina-movimento.md`: **OBRIGATÓRIO antes de montar qualquer cena.** Pular a doutrina é o que deixa o resultado genérico.
 5. `referencias/estilos.md`: **OBRIGATÓRIO no modo editado inteiro.** O banco dos 17 estilos, o guia de sugestão por trecho e o modelo da pergunta.
-6. Sob demanda em `referencias/`: `formatos.md`, `brandings.md`, `logos-e-simbolos.md`, `som.md`, `retroalimentacao.md`, `apple-hig-para-motion.md`.
+6. `referencias/trials.md`: **OBRIGATÓRIO depois da aprovação**, quando entram as variações pra trial reels.
+7. Sob demanda em `referencias/`: `formatos.md`, `brandings.md`, `logos-e-simbolos.md`, `som.md`, `retroalimentacao.md`, `apple-hig-para-motion.md`.
 
 ## Como o criador trabalha com a skill (padrão de fábrica; o `perfil.md` ajusta)
 1. **Roteiro:** o criador já tem o roteiro (num gerenciador de conteúdo, arquivo ou colado na conversa). A skill lê o roteiro e o texto exato de cada fala.
@@ -20,6 +21,7 @@ description: Edita reels inteiros e cria motion design em código (Remotion) no 
 3. **Bruto:** ele manda o arquivo gravado, com retakes. A skill escolhe os takes e corta.
 4. **Assistir e perguntar o estilo (obrigatório no editado):** a skill assiste o bruto, identifica que estilos cabem em cada trecho e faz duas perguntas: tela dividida ou não, e quais estilos aplicar, sempre relembrando os 17 com a descrição curta e trazendo sugestão por trecho (`referencias/estilos.md`).
 5. **Portão:** a skill mostra o script de motion ANTES de construir e só renderiza depois do OK.
+6. **Trial reels:** com o vídeo aprovado, a skill oferece as variações de gancho pra testar com quem não segue (`referencias/trials.md`).
 
 ## Dois modos
 - **Editado inteiro** (padrão para reels): a skill entrega o reels pronto (cortes + câmera + motion + legenda + SFX).
@@ -29,6 +31,7 @@ description: Edita reels inteiros e cria motion design em código (Remotion) no 
   4. **Perguntar (PORTÃO DE ESTILO, obrigatório):** mandar o modelo de `referencias/estilos.md`: (a) tela dividida ou câmera cheia; (b) quais estilos, com a tabela `tempo | fala | sugestão | por quê` e a lista dos 17 com uma linha cada. Esperar a resposta. Não pular, mesmo com referência ou briefing: o modo autônomo ainda não está ligado.
   5. Montar conforme a resposta. **Tela dividida:** copiar `studio/src/acervo/_modelos/modelo-editado/` pra `studio/src/acervo/<topico>/<slug>/`, registrar em `studio/src/Root.tsx` (id com "Editado") e montar as cenas dentro de `<ReelsEditado>`: painel de motion no topo (0-900px), câmera deslocada embaixo, `<TelaCheia>` (até 2), `momento(ed, "palavra", fala)` pra ação cair NA palavra. Legenda e som já vêm prontos. **Câmera cheia:** base `studio/src/edicao/ReelsCheio.tsx` (motion `sobre` a câmera, `<TelaCheia>` quando a cena pede), e cada estilo escolhido montado a partir da ficha em `referencias/estilos.md` (ou adaptado da composição `Estilo*` em `studio/src/acervo/estilos/NN-nome/`, quando ela existir no acervo local), entrando na palavra do trecho. Exemplo aprovado descrito em `estilos.md`.
   6. `motor/render.sh <Id> <saida>` → `.mp4`.
+  7. **Trial reels (depois do OK do criador):** perguntar "Edição aprovada. Quer as variações pra trial reels?" (se ele já pediu, só fazer). Padrão 5 versões, cada uma com um gancho do banco de `referencias/trials.md`, mudando só os ~3 s iniciais: o corpo é o vídeo aprovado. Montar com `studio/src/edicao/variacoes.ts`, entregar como `trials/trial-0N-<gancho>.mp4` na pasta de entrega do `perfil.md` + `trials.md` com a hipótese de cada uma.
 - **Overlay** (só o motion, o criador junta no editor dele): composição com `<Reels>`, render `.mov` ProRes 4444 com transparência, duração exata do vídeo gravado.
 
 ## Fluxo
@@ -41,6 +44,7 @@ description: Edita reels inteiros e cria motion design em código (Remotion) no 
 5. **Conferir:** `motor/folha.sh <Id> <saida.png> <frames...>` e OLHAR a folha contra o **checklist "cara de premium"** (fim da doutrina) + área segura + nada sobreposto. Corrigir antes de mostrar.
 6. **Renderizar** só com OK: `motor/render.sh <Id> <saida>`.
 7. **Acervo:** vídeo + `ficha.md` (modelo em `formatos.md`) na pasta de acervo do `perfil.md` + linha no catálogo.
+7b. **Trial reels:** com o OK, variações de gancho (`referencias/trials.md`).
 8. **Retroalimentar:** `MEMORY.md` (pessoal), incluindo que estilos ele escolheu, aprovou ou reprovou, e a coluna "notas do criador" de `referencias/estilos.md`. É esse histórico que um dia libera o modo autônomo. Aprendizado que vale pra todo criador sobe pra doutrina/código e pode ser mandado pro time (`COLABORACAO.md`).
 
 ## Colaboração (trocar melhorias com o time)
@@ -49,7 +53,8 @@ Protocolo completo em `COLABORACAO.md` (raiz do repositório). Resumo:
 - **"o que o <nome> mandou?" / "puxa a atualização":** listar PRs abertos, resumir cada um, testar (tipos + folha da demo) e só fazer merge com OK do criador. Depois `git pull`.
 
 ## Regras
-- Script antes de gerar, sempre. Nada de render sem OK.
+- Script antes de gerar, sempre. Nada de render sem OK. Exceção: quando o criador manda editar sem portão ("só edita e me apresenta a final"), vale pra aquele vídeo.
+- Trial reels só depois da aprovação, e só o gancho muda.
 - No editado inteiro, as duas perguntas de estilo (tela dividida? quais estilos?) vêm antes do script, sempre com a lista dos 17. Estilo é efeito de trecho, não do vídeo inteiro.
 - **Modo autônomo (futuro, NÃO ativo):** a skill escolher sozinha tela dividida e estilos e editar sem perguntar. Só liga quando o criador disser.
 - Checklist "cara de premium" conferido na folha ANTES de mostrar.
