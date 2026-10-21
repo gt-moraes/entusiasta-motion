@@ -5,7 +5,8 @@ Uso: preparar.py <id> <bruto.MP4> <cortes.json>
   cortes.json = [[inicio_s, fim_s, "texto EXATO que ele fala nesse take"], ...] na ordem do vídeo.
   Escolha os takes com motor/takes.sh (regra: o ÚLTIMO take de cada fala). Dê ~0,08s de folga antes e ~0,1s depois.
 Gera:
-  public/brutos/<id>.mp4    proxy H.264 1080x1920 30fps (o bruto 4K HEVC do DJI não serve direto)
+  public/brutos/<id>.mp4    proxy H.264 1080x1920 30fps BT.709 em pé (bruto 4K HEVC do DJI ou do iPhone;
+                            HLG/PQ do iPhone passa por tonemap VideoToolbox e a rotação vira giro real)
   public/edicoes/<id>.json  {segs, words}: falas no tempo da edição + tempo de cada palavra
                             (texto vem do cortes.json, tempo vem do whisper; a transcrição erra nomes)
 """
@@ -18,10 +19,30 @@ MODELO = os.environ.get("WHISPER_MODELO", str(Path.home() / ".cache/whisper-cpp/
 c = json.loads(CORTES.read_text())
 T = Path(tempfile.mkdtemp())
 proxy = MS / "brutos" / f"{ID}.mp4"
+def sonda(arq):
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                        "stream=color_transfer:stream_side_data=rotation", "-of", "json", str(arq)], capture_output=True, text=True)
+    s = (json.loads(r.stdout or "{}").get("streams") or [{}])[0]
+    rot = next((int(float(d["rotation"])) for d in s.get("side_data_list", []) if "rotation" in d), 0) % 360
+    return s.get("color_transfer", ""), rot
+SAIDA = ["-map", "0:v:0", "-map", "0:a:0", "-c:v", "libx264", "-crf", "18", "-preset", "fast", "-pix_fmt", "yuv420p",
+         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709", "-g", "30", "-c:a", "aac", "-b:a", "192k",
+         "-movflags", "+faststart", str(proxy)]
 if not proxy.exists():
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(BRUTO), "-map", "0:v:0", "-map", "0:a:0", "-vf", "scale=1080:1920,fps=30",
-                    "-c:v", "libx264", "-crf", "18", "-preset", "fast", "-pix_fmt", "yuv420p", "-g", "30", "-c:a", "aac", "-b:a", "192k",
-                    "-movflags", "+faststart", str(proxy)], check=True)
+    trc, rot = sonda(BRUTO)
+    feito = False
+    if trc in ("arib-std-b67", "smpte2084"):
+        giro = {90: ",transpose=cclock", 270: ",transpose=clock", 180: ",hflip,vflip"}.get(rot, "")
+        w, h = (1920, 1080) if rot in (90, 270) else (1080, 1920)
+        vf = (f"scale_vt=w={w}:h={h}:color_matrix=bt709:color_primaries=bt709:color_transfer=bt709,hwdownload,format=p010le"
+              f"{giro},fps=30,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709")
+        r = subprocess.run(["ffmpeg", "-v", "error", "-y", "-noautorotate", "-hwaccel", "videotoolbox", "-hwaccel_output_format",
+                            "videotoolbox_vld", "-i", str(BRUTO), "-vf", vf] + SAIDA)
+        feito = r.returncode == 0
+        if not feito:
+            print(f"aviso: tonemap HDR->SDR pelo VideoToolbox falhou ({trc}); proxy sem tonemap vai sair lavado", file=sys.stderr)
+    if not feito:
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(BRUTO), "-vf", "scale=1080:1920,fps=30"] + SAIDA, check=True)
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(BRUTO), "-vn", "-ac", "1", "-ar", "16000", str(T / "a.wav")], check=True)
 for i, (a, b, _) in enumerate(c):
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(a), "-to", str(b), "-i", str(T / "a.wav"), str(T / f"c{i}.wav")], check=True)
